@@ -4,7 +4,7 @@
 import sys
 import csv
 
-class Colors
+class Colors:
   TABLE = {
       'black' : '\033[30m',
       'red' : '\033[31m',
@@ -17,7 +17,7 @@ class Colors
       'reset' : '\033[39m'
   }
   def prn(self, color, string):
-  return self.TABLE['reset']+self.TABLE[color]+string+self.TABLE['reset']
+    return self.TABLE['reset']+self.TABLE[color]+string+self.TABLE['reset']
 
 class PrettyT:
   def extract(self, line):
@@ -32,4 +32,15 @@ class PrettyT:
     | @{0} / {1} / {2}
     | {3}
     """
-    return tmpl.format(self.extract(line))
+    d = self.extract(line)
+    if d[0] and d[1]:
+      return tmpl.format(d)
+    else:
+      return ""
+
+
+t = PrettyT()
+
+for line in iter(sys.stdin.readline, ""):
+  print line
+  print t.processLine(line)
