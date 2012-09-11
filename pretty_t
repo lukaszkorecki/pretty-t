@@ -20,27 +20,48 @@ class Colors:
     return self.TABLE['reset']+self.TABLE[color]+string+self.TABLE['reset']
 
 class PrettyT:
-  def extract(self, line):
-    try:
-      t_id, time, user, status = csv.reader([line])
-      return [t_id, time, user,status]
-    except:
-      return [False, False, False, line] # lolz
 
-  def processLine(self, line):
-    tmpl = """--
-    | @{0} / {1} / {2}
-    | {3}
-    """
+  tmpl = '''--
+| @{user} / {_id} / {time}
+| {body}'''
+
+  def extract(self, line):
+    d = []
+    try:
+      for _ in csv.reader([line]):
+        d.append(_)
+    except csv.Error: # \n in status body! or some other crap
+      try:
+        ex = line.split(',',3)
+      except ValueError:
+        ex = line
+
+      d.append(ex)
+
+
+
+    return d[0]
+
+  def processLine(self, line,colorizer):
     d = self.extract(line)
-    if d[0] and d[1]:
-      return tmpl.format(d)
+    if len(d) > 1:
+      t_id, time,user,status = d
+      ok = True
     else:
-      return ""
+      ok = False
+      status = line
+
+    if ok:
+      u = colorizer.prn('green',user)
+      i = colorizer.prn('yellow',t_id)
+      t = colorizer.prn('white', time)
+      return self.tmpl.format(user=u, _id=i, time=t, body=status)
+    else:
+      return "| "+status
 
 
 t = PrettyT()
+c = Colors()
 
 for line in iter(sys.stdin.readline, ""):
-  print line
-  print t.processLine(line)
+  print t.processLine(line,c)
